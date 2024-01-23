@@ -19,8 +19,6 @@ const createUsers = async (req,res,next) => {
        }
 };
 
-
-
 export {
     createUsers
 }
