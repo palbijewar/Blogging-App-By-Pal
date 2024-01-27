@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import {Home,About,SignIn,SignUp,Dashboard,Projects} from "./pages";
-import { Header } from "./components";
+import { Header, FooterComponent } from "./components";
 
 export default function App() {
   return (
@@ -15,6 +15,7 @@ export default function App() {
     <Route path="/dashboard" element={<Dashboard/>} />
     <Route path="/projects" element={<Projects/>} />
    </Routes>
+   <FooterComponent/>
    </BrowserRouter>
    </>
   )

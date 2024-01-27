@@ -1,5 +1,7 @@
 import Header from "./Header";
+import FooterComponent from "./Footer";
 
 export {
-    Header
+    Header,
+    FooterComponent
 }
