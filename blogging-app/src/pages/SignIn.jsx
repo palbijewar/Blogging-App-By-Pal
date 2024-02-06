@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Label, TextInput, Button, Alert, Spinner } from 'flowbite-react';
 import {signInStart, signInSuccess, signInFailure} from "../redux/user/userSlice.js";
 import {useDispatch , useSelector} from 'react-redux';
+import {Oath} from '../components';
 'use client';
 
 export default function SignIn() {
@@ -93,6 +94,7 @@ const handleSubmit = async (e) => {
   ) : 'Sign In'
 }
   </Button>
+  <Oath/>
   <div className='flex gap-2 text-sm mt-5' >
     <span> Don't have an account ? </span>
     <Link to='/signup' className='text-blue-500' >
