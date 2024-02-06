@@ -14,6 +14,10 @@ const userSchema = new Schema({
     password : {
         type:String,
         required:true,
+    },
+    profile_picture : {
+        type : String,
+        default : "https://th.bing.com/th/id/OIP.IGNf7GuQaCqz_RPq5wCkPgAAAA?rs=1&pid=ImgDetMain"
     }
 }, {timestamps:true} )
 
