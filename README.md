@@ -34,13 +34,13 @@ To run this application locally, follow these steps:
 1. Clone this repository to your local machine:
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/palbijewar/Blogging-App-By-Pal.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd full-stack-mern-blogging-app
+   cd Blogging-App-By-Pal
    ```
 
 3. Install the dependencies:
