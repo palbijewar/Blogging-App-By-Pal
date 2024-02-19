@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import userRoutes from './routes/users.routes.js';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 dotenv.config();
 
@@ -19,6 +20,8 @@ app.use(cors({
 mongoose.connect(`${process.env.MONGODB_URL}`).then(() => console.log(`Database connected!`)).catch((error) => console.log(error));
 
 app.use('/api/users', userRoutes);
+
+app.use(cookieParser());
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
