@@ -12,8 +12,8 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true,
+  origin: 'http://localhost:3000',
+  credentials: true, 
 }));
 
 mongoose.connect(`${process.env.MONGODB_URL}`).then(() => console.log(`Database connected!`)).catch((error) => console.log(error));

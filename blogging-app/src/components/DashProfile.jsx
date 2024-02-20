@@ -20,6 +20,9 @@ export default function DashProfile() {
   const [imageFileUploadingProgress, setImageFileUploadingProgress] = useState(null)
   const [imageFileUploadingError, setImageFileUploadingError] = useState(null)
   const [formData, setFormData] = useState({});
+  const [imageFileUploading, setImageFileUploading] = useState(false)
+  const [updateUserSuccess, setUpdateUserSuccess] = useState(null)
+  const [updateUserFailure, setUpdateUserFailure] = useState(null)
   const dispatch = useDispatch();
 
 const handleImageChange = (e) => {
@@ -37,6 +40,7 @@ useEffect(() => {
 }, [imageFile])
 
 const uploadImage = async () => {
+ setImageFileUploading(true)
  const storage = getStorage(app);
  const fileName = new Date().getTime() + imageFile.name
  const storageRef = ref(storage, fileName)
@@ -52,11 +56,13 @@ const uploadImage = async () => {
     setImageFileUploadingError('Could not upload image (file must be 2MB)!')
     setImageFileUploadingProgress(null)
     setImageFileUrl(null)
+    setImageFileUploading(false)
   },
   () => {
     getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
       setImageFileUrl(downloadURL)
       setFormData({...formData, profile_picture: downloadURL })
+      setImageFileUploading(false)
     })
   },
  )
@@ -69,26 +75,38 @@ const handleInputChange = (e) => {
 
 const handleFormSubmit = async (e) => {
   e.preventDefault();
+  setUpdateUserSuccess(null)
+  setUpdateUserFailure(null)
   if(Object.keys(formData).length === 0){
+    setUpdateUserFailure("No changes made")
     return;
+  }
+  if(imageFileUploading){
+    setUpdateUserFailure("Please wait for image to upload")
+    return
   }
   try {
     dispatch(updateStart());
-    const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}`, {
+    const res = await fetch('http://localhost:3000/api/users/65d44b79caad7255b963e251', {
       method: 'PUT',
       headers: {
-        'Content-Type' : 'application/json',
+        'Content-Type': 'application/json',
       },
+      credentials: 'include',
       body: JSON.stringify(formData),
     })
+    
     const data = await res.json();
-    if(!res.data){
+    if(!res.ok){
       dispatch(updateFailure(data.message));
+      setUpdateUserFailure(data.message)
     } else {
       dispatch(updateSuccess(data))
+      setUpdateUserSuccess("User's profile updated successfully!")
     }
   } catch (error) {
     dispatch(updateFailure(error.message));
+    setUpdateUserFailure(data.message)
   }
 }
 
@@ -146,6 +164,20 @@ const handleFormSubmit = async (e) => {
       <span className='cursor-pointer' >Delete Account</span>
       <span className='cursor-pointer' >Sign Out</span>
      </div>
+     {
+      updateUserSuccess && (
+        <Alert color='success' className='mt-5' >
+          {updateUserSuccess}
+        </Alert>
+      )
+     }
+      {
+      updateUserFailure && (
+        <Alert color='failure' className='mt-5' >
+          {updateUserFailure}
+        </Alert>
+      )
+     }
     </div>
   )
 }

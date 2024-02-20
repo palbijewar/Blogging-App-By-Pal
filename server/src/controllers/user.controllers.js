@@ -92,9 +92,9 @@ export const updateUserProfile = async (req, res, next) => {
   if(req.body.username !== req.body.username.toLowerCase()){
     return next(errorHandler(400,"Username must be lower case"))
   }
-  if(req.body.username.match(/^[a-zA-Z0-9]+$/)){
-    return next(errorHandler(400,"Username cannot contain speacial characters"))
-  }
+  // if(req.body.username.match(/^[a-zA-Z0-9]+$/)){
+  //   return next(errorHandler(400,"Username cannot contain speacial characters"))
+  // }
   try {
 const updatedUser = await users.findByIdAndUpdate(req.params.id, {
   $set: {
