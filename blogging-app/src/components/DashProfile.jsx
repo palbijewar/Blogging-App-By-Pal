@@ -1,6 +1,6 @@
 import { TextInput, Button, Alert } from 'flowbite-react'
 import React, { useEffect, useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import {
   getDownloadURL,
   getStorage,
@@ -10,6 +10,7 @@ import {
 import { app } from '../firebase'
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
+import {updateStart, updateSuccess, updateFailure} from '../redux/user/userSlice.js';
 
 export default function DashProfile() {
   const {currentUser} = useSelector(state => state.user)
@@ -18,6 +19,8 @@ export default function DashProfile() {
   const filePickerRef =  useRef()
   const [imageFileUploadingProgress, setImageFileUploadingProgress] = useState(null)
   const [imageFileUploadingError, setImageFileUploadingError] = useState(null)
+  const [formData, setFormData] = useState({});
+  const dispatch = useDispatch();
 
 const handleImageChange = (e) => {
   const file = e.target.files[0]
@@ -26,7 +29,6 @@ const handleImageChange = (e) => {
     setImageFileUrl(URL.createObjectURL(file))
   }
 };
-
 
 useEffect(() => {
   if(imageFile){
@@ -54,15 +56,46 @@ const uploadImage = async () => {
   () => {
     getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
       setImageFileUrl(downloadURL)
+      setFormData({...formData, profile_picture: downloadURL })
     })
   },
  )
 }
 
+const handleInputChange = (e) => {
+  setFormData({...formData, [e.target.id] : e.target.value});
+  
+}
+
+const handleFormSubmit = async (e) => {
+  e.preventDefault();
+  if(Object.keys(formData).length === 0){
+    return;
+  }
+  try {
+    dispatch(updateStart());
+    const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type' : 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+    const data = await res.json();
+    if(!res.data){
+      dispatch(updateFailure(data.message));
+    } else {
+      dispatch(updateSuccess(data))
+    }
+  } catch (error) {
+    dispatch(updateFailure(error.message));
+  }
+}
+
   return (
     <div className='max-w-lg mx-auto p-3 w-full' >
      <h1 className='my-7 text-center font-semibold text-3xl' >Profile</h1>
-     <form className='flex flex-col gap-4 '>
+     <form onSubmit={handleFormSubmit} className='flex flex-col gap-4 '>
       <input type="file" accept='image/*' onChange={handleImageChange} ref={filePickerRef} hidden />
       <div className='relative w-32 h-32 self-center cursor-pointer shadow-md overflow-hidden rounded-full' onClick={()=>filePickerRef.current.click()} >
   <img src={imageFileUrl || currentUser.profile_picture} alt="user" className={`rounded-full w-full h-full object-cover border-8 border-[lightgray] ${imageFileUploadingProgress && imageFileUploadingProgress<100 && 'opacity-60' } `} />
@@ -80,11 +113,27 @@ const uploadImage = async () => {
     </div>
   )}
 </div>
-
       {imageFileUploadingError &&  <Alert color='failure' >{}</Alert> }
-      <TextInput type='text' id='username' placeholder='username' defaultValue={currentUser.username} />
-      <TextInput type='text' id='email' placeholder='email' defaultValue={currentUser.email} />
-      <TextInput type='text' id='password' placeholder='Password'  />
+      <TextInput 
+      type='text' 
+      id='username' 
+      placeholder='username'
+      defaultValue={currentUser.username}
+      onChange={handleInputChange}
+      />
+      <TextInput 
+      type='text' 
+      id='email' 
+      placeholder='email' 
+      defaultValue={currentUser.email}
+      onChange={handleInputChange}
+      />
+      <TextInput 
+      type='text' 
+      id='password' 
+      placeholder='Password'
+      onChange={handleInputChange}
+      />
       <Button
       type='submit'
       gradientDuoTone='purpleToBlue'

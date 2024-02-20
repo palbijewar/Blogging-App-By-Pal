@@ -4,20 +4,20 @@ import { errorHandler } from '../utils/error.js';
 import jwt from 'jsonwebtoken';
 
 export const createUser = async (req,res,next) => {
-       try {
-         const { username, email, password } = req.body;
-         if (!username || !email || !password) {
-            next(errorHandler(400,"All fields are required"))
-         }
-         if(password.length<8){
-            next(errorHandler(400,"Password must be of 8 charaters or more"))
-         }
-         const hashedPassword = bcrypt.hashSync(password,10);
-         const newUser = await users.create({ username, email, password:hashedPassword });
-         return res.status(201).json(newUser);
-       } catch (error) {
-        next(error)
-       }
+  try {
+    const { username, email, password } = req.body;
+    if (!username || !email || !password) {
+      return next(errorHandler(400,"All fields are required"));
+    }
+    if(password.length<8){
+      return next(errorHandler(400,"Password must be of 8 characters or more"));
+    }
+    const hashedPassword = bcrypt.hashSync(password,10);
+    const newUser = await users.create({ username, email, password:hashedPassword });
+    return res.status(201).json(newUser);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const loginUser = async (req, res, next) => {

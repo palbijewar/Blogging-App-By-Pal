@@ -41,7 +41,7 @@ return setErrorMessage('Please fill out all fields.')
     }
     setLoading(false);
     if(res.ok){
-      navigate('/sign-in')
+      navigate('/signin')
     }
   } catch (error) {
     setErrorMessage(error.message);
@@ -101,7 +101,7 @@ return setErrorMessage('Please fill out all fields.')
   <Oath/>
   <div className='flex gap-2 text-sm mt-5' >
     <span> Have an account already ? </span>
-    <Link to='/sign-in' className='text-blue-500' >
+    <Link to='/signin' className='text-blue-500' >
     Sign In
     </Link>
     {

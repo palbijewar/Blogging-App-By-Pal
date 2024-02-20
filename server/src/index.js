@@ -8,10 +8,9 @@ import cookieParser from 'cookie-parser';
 dotenv.config();
 
 const app = express();
-
+app.use(cookieParser());
 app.use(express.json());
 
-// Server-side CORS configuration
 app.use(cors({
   origin: 'http://localhost:5173',
   credentials: true,
@@ -20,8 +19,6 @@ app.use(cors({
 mongoose.connect(`${process.env.MONGODB_URL}`).then(() => console.log(`Database connected!`)).catch((error) => console.log(error));
 
 app.use('/api/users', userRoutes);
-
-app.use(cookieParser());
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
