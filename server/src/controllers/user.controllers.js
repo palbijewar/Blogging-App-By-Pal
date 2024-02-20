@@ -54,7 +54,7 @@ export const google = async (req, res, next) => {
       res.status(200).cookie('access_token', token, { httpOnly: true }).json(user);
     } else {
       const generatedPassword = Math.random().toString(36).slice(-8);
-      const hashedPassword = await bcrypt.hash(generatedPassword, 10); // Await the result of bcrypt.hash
+      const hashedPassword = await bcrypt.hash(generatedPassword, 10); 
       const newUser = new users({
         username: name.toLowerCase().split(' ').join('') + Math.random().toString(9).slice(-4),
         password: hashedPassword,
@@ -118,6 +118,14 @@ export const deleteUser = async (req,res,next) => {
   try {
     await users.findByIdAndDelete(req.params.id)
     res.status(200).json("User deleted");
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const signoutUser = async (req,res,next) => {
+  try {
+    res.clearCookie('access_token').status(200).json('User has been signed out')
   } catch (error) {
     next(error);
   }
