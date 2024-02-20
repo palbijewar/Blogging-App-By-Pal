@@ -110,3 +110,15 @@ res.status(200).json(rest);
   next(error);
 }
 }
+
+export const deleteUser = async (req,res,next) => {
+  if(req.user.id !== req.params.id){
+    return next(errorHandler(401, 'Unauthorized'))
+  }
+  try {
+    await users.findByIdAndDelete(req.params.id)
+    res.status(200).json("User deleted");
+  } catch (error) {
+    next(error);
+  }
+}
