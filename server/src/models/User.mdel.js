@@ -18,7 +18,11 @@ const userSchema = new Schema({
     profile_picture : {
         type : String,
         default : "https://th.bing.com/th/id/OIP.IGNf7GuQaCqz_RPq5wCkPgAAAA?rs=1&pid=ImgDetMain"
-    }
+    },
+    id_admin : {
+        type:Boolean,
+        default:false,
+    },
 }, {timestamps:true} )
 
 const users = model("Users", userSchema);

@@ -34,7 +34,7 @@ export const loginUser = async (req, res, next) => {
      if (!validPassword) {
       return next(errorHandler(400,"Invalid Email Or Password"))
      }
-     const token =  jwt.sign({ id : validUser._id }, process.env.JWT_SECRET,
+     const token =  jwt.sign({ id : validUser._id, isAdmin : validUser.is_admin }, process.env.JWT_SECRET,
      { expiresIn : '1h' }
      )
      res.status(200).cookie('access_token', token, {
@@ -50,7 +50,7 @@ export const google = async (req, res, next) => {
     const user = await users.findOne({ email });
 
     if (user) {
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ id: user._id, isAdmin : user.is_admin }, process.env.JWT_SECRET, { expiresIn: '1h' });
       res.status(200).cookie('access_token', token, { httpOnly: true }).json(user);
     } else {
       const generatedPassword = Math.random().toString(36).slice(-8);
@@ -63,7 +63,7 @@ export const google = async (req, res, next) => {
       });
 
       await newUser.save();
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      const token = jwt.sign({ id: newUser._id, isAdmin : newUser.is_admin }, process.env.JWT_SECRET, { expiresIn: '1h' });
       res.status(200).cookie('access_token', token, { httpOnly: true }).json(newUser);
     }
   } catch (error) {

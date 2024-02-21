@@ -16,7 +16,9 @@ app.use(cors({
   credentials: true, 
 }));
 
-mongoose.connect(`${process.env.MONGODB_URL}`).then(() => console.log(`Database connected!`)).catch((error) => console.log(error));
+mongoose.connect(`${process.env.MONGODB_URL}`)
+.then(() => console.log(`Database connected!`))
+.catch((error) => console.log(error));
 
 app.use('/api/users', userRoutes);
 
