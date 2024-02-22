@@ -3,8 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { AiOutlineSearch } from 'react-icons/ai';
 import { FaMoon, FaSun } from 'react-icons/fa';
 import { useSelector, useDispatch } from 'react-redux';
-import {toggleTheme} from "../redux/theme/themeSlice"
-'use client';
+import { toggleTheme } from "../redux/theme/themeSlice"
 import { signoutUserSuccess } from '../redux/user/userSlice.js';
 
 export default function Header() {
@@ -19,7 +18,7 @@ export default function Header() {
         method: 'POST',
         credentials: 'include',
       });
-      
+
       if (!res.ok) {
         throw new Error('Failed to sign out');
       } else {
@@ -32,7 +31,7 @@ export default function Header() {
 
   return (
     <Navbar className='border-b-2 bg-white'>
-     <Link
+      <Link
         to='/'
         className='self-center whitespace-nowrap text-sm sm:text-xl font-semibold dark:text-white'
       >
@@ -53,8 +52,8 @@ export default function Header() {
         <AiOutlineSearch />
       </Button>
       <div className='flex gap-2 md:order-2 items-center'>
-      <Button className='w-12 h-10 hidden sm:inline' color='gray' pill onClick={()=>dispatch(toggleTheme())} >
-        {theme === 'light' ? <FaMoon/> : <FaSun/> }
+        <Button className='w-12 h-10 hidden sm:inline' color='gray' pill onClick={() => dispatch(toggleTheme())}>
+          {theme === 'light' ? <FaMoon /> : <FaSun />}
         </Button>
         {currentUser ? (
           <Dropdown
@@ -62,32 +61,30 @@ export default function Header() {
             inline
             label={
               <Avatar
-              alt='user'
-              img={currentUser.profile_picture}
-              rounded
+                alt='user'
+                img={currentUser.profile_picture} 
+                rounded
               />
             }
-            >
+          >
             <Dropdown.Header>
-          <span className='block text-sm' >@{currentUser.username}</span>
-          <span className='block text-sm font-medium truncate' >{currentUser.email}</span>
+              <span className='block text-sm'>@{currentUser.username}</span>
+              <span className='block text-sm font-medium truncate'>{currentUser.email}</span>
             </Dropdown.Header>
             <Link to={'/dashboard?tab=profile'} >
               <Dropdown.Item>
                 Profile
               </Dropdown.Item>
-              <Dropdown.Divider/>
+              <Dropdown.Divider />
               <Dropdown.Item onClick={handleSignout} >Sign out</Dropdown.Item>
             </Link>
           </Dropdown>
-        ) :
-        (
+        ) : path !== '/signin' && path !== '/signup' ? ( // Check if the current path is not the sign-in or sign-up page
           <Link to='/signin'>
-          <Button gradientDuoTone='purpleToBlue' pill outline >Sign In</Button>
-        </Link>
-        )
-      }
-     
+            <Button gradientDuoTone='purpleToBlue' pill outline >Sign In</Button>
+          </Link>
+        ) : null // Render nothing if the current path is the sign-in or sign-up page
+        }
         <Navbar.Toggle />
       </div>
       <Navbar.Collapse>
