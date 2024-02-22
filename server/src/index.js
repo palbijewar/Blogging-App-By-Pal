@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import userRoutes from './routes/users.routes.js';
+import postRoutes from './routes/posts.routes.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
@@ -21,6 +22,7 @@ mongoose.connect(`${process.env.MONGODB_URL}`)
 .catch((error) => console.log(error));
 
 app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
