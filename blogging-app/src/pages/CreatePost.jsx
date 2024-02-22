@@ -74,7 +74,6 @@ function CreatePost() {
       setPublishError(null);
       console.log(`/posts/${data.slug}`);
       navigate(`/posts/${data.slug}`);
-      
       setFormData({});
     }    
   } catch (error) {
