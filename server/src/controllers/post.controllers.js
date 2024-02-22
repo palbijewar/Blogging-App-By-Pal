@@ -75,4 +75,31 @@ export const deletePost = async (req,res,next) => {
    } catch (error) {
       next(error)
    }
-}
+};
+
+export const updatePost = async (req, res, next) => {
+   if (!req.user.is_admin || req.user.id !== req.params.userId) {
+      return next(errorHandler(403, 'You are not allowed to update this post'));
+   }
+
+   try {
+      const updatedPost = await posts.findByIdAndUpdate(
+         req.params.postId, 
+         {   
+            title: req.body.title,
+            content: req.body.content,
+            category: req.body.category,
+            image: req.body.image,
+         },
+         { new: true } 
+      );
+      
+      if (!updatedPost) {
+         return next(errorHandler(404, 'Post not found'));
+      }
+
+      res.status(200).json(updatedPost);
+   } catch (error) {
+      next(error);
+   }
+};
