@@ -22,39 +22,45 @@ export const createPost = async (req,res,next) => {
  }
 };
 
-export const getPosts = async (req,res,next) => {
+export const getPosts = async (req, res, next) => {
    try {
       const startIndex = parseInt(req.query.startIndex) || 0;
       const limit = parseInt(req.query.limit) || 9;
       const sortDirection = req.query.order === 'asc' ? 1 : -1;
-      const posts = await posts.find(
-       ...(req.query.user_id && {user_id: req.query.user_id}),
-       ...(req.query.category && {category: req.query.category}),
-      ...(req.query.slug && {slug: req.query.slug}),
-      ...(req.query.post_id && {id: req.query.post_id}),
-      ...(req.query.searchTerm && {
-         $or: [
-            {title: { $regex: req.query.searchItem, options : 'i' }},
-            {content: { $regex: req.query.searchItem, options : 'i' }}
-         ],
-      }),
-      ).sort({updatedAt : sortDirection}).skip(startIndex).limit(limit);
-      const totalPosts = await posts.countDocuments();
+      
+      const queryConditions = {
+         ...(req.query.user_id && { user_id: req.query.user_id }),
+         ...(req.query.category && { category: req.query.category }),
+         ...(req.query.slug && { slug: req.query.slug }),
+         ...(req.query.post_id && { _id: req.query.post_id }), 
+         ...(req.query.searchTerm && {
+            $or: [
+               { title: { $regex: req.query.searchTerm, $options: 'i' }},
+               { content: { $regex: req.query.searchTerm, $options: 'i' }} 
+            ],
+         }),
+      };
+      
+      const allPosts = await posts
+         .find(queryConditions)
+         .sort({ updatedAt: sortDirection })
+         .skip(startIndex)
+         .limit(limit);
+         
+      const totalPosts = await posts.countDocuments(); 
+      
       const now = new Date();
-      const oneMonthAgo = new Date(
-         now.getFullYear(),
-         now.getMonth() - 1,
-         now.getDate()
-      );
+      const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      
       const lastMonthPosts = await posts.countDocuments({
-         createdAt : {$gte: oneMonthAgo},
+         createdAt: { $gte: oneMonthAgo },
       });
       res.status(200).json({
-         posts,
+         allPosts,
          totalPosts,
          lastMonthPosts,
       });
    } catch (error) {
-      next(error)
+      next(error);
    }
-}
+};
