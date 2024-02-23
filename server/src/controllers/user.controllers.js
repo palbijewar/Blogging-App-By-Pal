@@ -113,7 +113,7 @@ res.status(200).json(rest);
 
 export const deleteUser = async (req,res,next) => {
   if(req.user.id !== req.params.id){
-    return next(errorHandler(401, 'Unauthorized'))
+    return next(errorHandler(403, 'You are not allowed to delete this post'))
   }
   try {
     await users.findByIdAndDelete(req.params.id)
@@ -126,6 +126,41 @@ export const deleteUser = async (req,res,next) => {
 export const signoutUser = async (req,res,next) => {
   try {
     res.clearCookie('access_token').status(200).json('User has been signed out')
+  } catch (error) {
+    next(error);
+  }
+}
+
+export const getUsers = async (req,res,next) => {
+  if(req.user.id !== req.params.id){
+    return next(errorHandler(403, 'You are not allowed to see all users'))
+  }
+  try {
+    const startIndex = parseInt(req.query.startIndex) || 0;
+    const limit = parseInt(req.query.limit) || 9;
+    const sortDirection = req.query.order === 'asc' ? 1 : -1;
+    
+    const allUsers = await users
+       .find(queryConditions)
+       .sort({ updatedAt: sortDirection })
+       .skip(startIndex)
+       .limit(limit);
+    const totalUsersWithoutPasswords = users.map((user) => {
+      const { password, ...rest } = user._doc;
+      return rest;
+    })
+    const totalUsers = await users.countDocuments();
+    const now = new Date();
+    const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+    
+    const lastMonthUsers = await users.countDocuments({
+       createdAt: { $gte: oneMonthAgo },
+    });
+    res.status(200).json({
+      totalUsersWithoutPasswords,
+      totalUsers,
+      lastMonthUsers,
+    })
   } catch (error) {
     next(error);
   }
