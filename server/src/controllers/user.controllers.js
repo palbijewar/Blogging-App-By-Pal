@@ -112,7 +112,7 @@ res.status(200).json(rest);
 }
 
 export const deleteUser = async (req,res,next) => {
-  if(req.user.id !== req.params.id){
+  if(!req.user.is_admin && req.user.id !== req.params.id){
     return next(errorHandler(403, 'You are not allowed to delete this post'))
   }
   try {
