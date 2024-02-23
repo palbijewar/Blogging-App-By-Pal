@@ -17,7 +17,7 @@ const commentSchema = new Schema({
         type:Array,
         default:[]
     },
-    replies : {
+    number_of_likes : {
         type:Number,
         default:0
     },
