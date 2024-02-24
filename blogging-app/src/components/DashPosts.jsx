@@ -1,4 +1,4 @@
-import { Table, Modal, Button, Spinner } from 'flowbite-react';
+import { Table, Modal, Button } from 'flowbite-react';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
@@ -10,7 +10,7 @@ function DashPosts() {
     const [showMore, setShowMore] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [postIdToDelete, setPostIdToDelete] = useState('');
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -19,7 +19,6 @@ function DashPosts() {
                 const res = await fetch(`http://localhost:3000/api/posts?user_id=${currentUser._id}`);
                 const data = await res.json();
                 if (res.ok) {
-                    setLoading(false);
                     if (data && data.length < 9) {
                         setShowMore(false);
                     }
@@ -28,8 +27,9 @@ function DashPosts() {
                     }
                 }
             } catch (error) {
+                console.error('Error fetching posts:', error.message);
+            } finally {
                 setLoading(false);
-                console.log(error.message);
             }
         };
 
@@ -41,6 +41,7 @@ function DashPosts() {
     const handleShowMore = async () => {
         const startIndex = userPosts.length;
         try {
+            setLoading(true);
             const res = await fetch(`http://localhost:3000/api/posts?user_id=${currentUser._id}&startIndex=${startIndex}`);
             const data = await res.json();
             if (res.ok) {
@@ -50,7 +51,9 @@ function DashPosts() {
                 }
             }
         } catch (error) {
-            console.log(error.message);
+            console.error('Error fetching more posts:', error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -63,75 +66,65 @@ function DashPosts() {
             });
             const data = await res.json();
             if (!res.ok) {
-                console.log(data.message);
+                console.error('Error deleting post:', data.message);
             } else {
                 setUserPosts(prev => prev.filter(post => post._id !== postIdToDelete));
             }
         } catch (error) {
-            console.log(error.message);
+            console.error('Error deleting post:', error.message);
         }
     };
 
-    if (loading) {
-        return (
-            <div className='flex justify-center items-center h-screen'>
-                <Spinner size='xl' />
-            </div>
-        );
-    }
-
-    if (!currentUser.is_admin) {
-        return <p>You do not have permission to view this page.</p>;
-    }
-
-    if (userPosts.length === 0) {
-        return <p>You have no posts to show.</p>;
-    }
-
     return (
         <div className='table-auto overflow-x-scroll md:mx-auto p-3 scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 dark:scrollbar-track-slate-700 dark:scrollbar-thumb-slate-500'>
-            {currentUser.is_admin && userPosts.length > 0 ? (
+            {currentUser.is_admin && (
                 <>
-                    <Table hoverable className='shadow-md'>
-                        <Table.Head>
-                            <Table.HeadCell>Date updated</Table.HeadCell>
-                            <Table.HeadCell>Post image</Table.HeadCell>
-                            <Table.HeadCell>Post title</Table.HeadCell>
-                            <Table.HeadCell>Category</Table.HeadCell>
-                            <Table.HeadCell>Delete</Table.HeadCell>
-                            <Table.HeadCell><span>Edit</span></Table.HeadCell>
-                        </Table.Head>
-                        <Table.Body>
-                            {userPosts.map(post => (
-                                <React.Fragment key={post._id}>
-                                    <Table.Row className='bg-white dark:border-gray-700 dark:bg-gray-800'>
-                                        <Table.Cell>{new Date(post.updatedAt).toLocaleDateString()}</Table.Cell>
-                                        <Table.Cell>
-                                            <Link to={`/post/${post.slug}`}>
-                                                <img src={post.image} alt={post.title} className='w-20 h-10 object-cover bg-gray-500' />
-                                            </Link>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <Link className='font-medium text-gray-900 dark:text-white' to={`/post/${post.slug}`}>{post.title}</Link>
-                                        </Table.Cell>
-                                        <Table.Cell>{post.category}</Table.Cell>
-                                        <Table.Cell>
-                                            <span className='font-medium text-red-500 hover:underline cursor-pointer' onClick={() => { setShowModal(true); setPostIdToDelete(post._id); }}>Delete</span>
-                                        </Table.Cell>
-                                        <Table.Cell>
-                                            <Link className='text-teal-500 hover:underline' to={`/update-post/${post._id}`}><span>Edit</span></Link>
-                                        </Table.Cell>
-                                    </Table.Row>
-                                </React.Fragment>
-                            ))}
-                        </Table.Body>
-                    </Table>
-                    {showMore && (
-                        <button onClick={handleShowMore} className='w-full text-teal-500 self-center text-sm py-7'>Show more</button>
+                    {loading ? (
+                        <p>Loading...</p>
+                    ) : userPosts.length > 0 ? (
+                        <>
+                            <Table hoverable className='shadow-md'>
+                                <Table.Head>
+                                    <Table.HeadCell>Date updated</Table.HeadCell>
+                                    <Table.HeadCell>Post image</Table.HeadCell>
+                                    <Table.HeadCell>Post title</Table.HeadCell>
+                                    <Table.HeadCell>Category</Table.HeadCell>
+                                    <Table.HeadCell>Delete</Table.HeadCell>
+                                    <Table.HeadCell><span>Edit</span></Table.HeadCell>
+                                </Table.Head>
+                                <Table.Body>
+                                    {userPosts.map(post => (
+                                        <React.Fragment key={post._id}>
+                                            <Table.Row className='bg-white dark:border-gray-700 dark:bg-gray-800'>
+                                                <Table.Cell>{new Date(post.updatedAt).toLocaleDateString()}</Table.Cell>
+                                                <Table.Cell>
+                                                    <Link to={`/post/${post.slug}`}>
+                                                        <img src={post.image} alt={post.title} className='w-20 h-10 object-cover bg-gray-500' />
+                                                    </Link>
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    <Link className='font-medium text-gray-900 dark:text-white' to={`/post/${post.slug}`}>{post.title}</Link>
+                                                </Table.Cell>
+                                                <Table.Cell>{post.category}</Table.Cell>
+                                                <Table.Cell>
+                                                    <span className='font-medium text-red-500 hover:underline cursor-pointer' onClick={() => { setShowModal(true); setPostIdToDelete(post._id); }}>Delete</span>
+                                                </Table.Cell>
+                                                <Table.Cell>
+                                                    <Link className='text-teal-500 hover:underline' to={`/update-post/${post._id}`}><span>Edit</span></Link>
+                                                </Table.Cell>
+                                            </Table.Row>
+                                        </React.Fragment>
+                                    ))}
+                                </Table.Body>
+                            </Table>
+                            {showMore && (
+                                <button onClick={handleShowMore} className='w-full text-teal-500 self-center text-sm py-7'>Show more</button>
+                            )}
+                        </>
+                    ) : (
+                        <p>Loading...</p>
                     )}
                 </>
-            ) : (
-                <p>You have no posts to show</p>
             )}
             <Modal show={showModal} onClose={() => setShowModal(false)} popup size='md'>
                 <Modal.Header />
