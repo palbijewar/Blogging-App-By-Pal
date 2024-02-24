@@ -72,3 +72,20 @@ export const getComments = async (req, res, next) => {
     }
   };
   
+  export const deleteComment = async (req, res, next) => {
+    try {
+      const comment = await comments.findById(req.params.commentId);
+      if (!comment) {
+        return next(errorHandler(404, 'Comment not found'));
+      }
+      if (comment.user_id.toString() !== req.user.id && !req.user.is_admin) {
+        return next(errorHandler(403, 'You are not allowed to delete this comment'));
+      }
+      console.log("Inside API")
+      await comments.findByIdAndDelete(req.params.commentId);
+      res.status(200).json('Comment deleted successfully');
+    } catch (error) {
+      next(error);
+    }
+  };
+  
