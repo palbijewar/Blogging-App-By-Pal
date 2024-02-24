@@ -1,5 +1,4 @@
-// Import necessary components and icons
-import { Table, Modal, Button } from 'flowbite-react';
+import { Table, Modal, Button, Spinner } from 'flowbite-react';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { HiOutlineExclamationCircle } from 'react-icons/hi';
@@ -11,10 +10,12 @@ function DashUsers() {
     const [showMore, setShowMore] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [userIdToDelete, setUserIdToDelete] = useState('');
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchUsers = async () => {
             try {
+                setLoading(true);
                 const res = await fetch(`http://localhost:3000/api/users`, {
                     credentials: 'include',
                 });
@@ -25,8 +26,10 @@ function DashUsers() {
                         setShowMore(data.totalUsersWithoutPasswords.length >= 9);
                     }
                 }
+                setLoading(false);
             } catch (error) {
                 console.log(error.message);
+                setLoading(false);
             }
         };
 
@@ -38,36 +41,48 @@ function DashUsers() {
     const handleShowMore = async () => {
         const startIndex = users.length;
         try {
+            setLoading(true);
             const res = await fetch(`http://localhost:3000/api/posts?startIndex=${startIndex}`);
             const data = await res.json();
             if (res.ok) {
                 setUsers(prev => [...prev, ...data.totalUsersWithoutPasswords]);
                 setShowMore(data.totalUsersWithoutPasswords.length >= 9);
             }
+            setLoading(false);
         } catch (error) {
             console.log(error.message);
+            setLoading(false);
         }
     };
 
     const handleDeleteUser = async () => {
         setShowModal(false);
         try {
-          const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}`,{
-              method: 'DELETE',
-              credentials: 'include',
-          });
-          const data = await res.json();
-          if (!res.ok) {
-              console.log(data.message);
-          } else {
-              setUsers((prev) => (
-                  prev.filter((user) => user._id !== userIdToDelete)
-              )
-              )}
+            setLoading(true);
+            const res = await fetch(`http://localhost:3000/api/users/${currentUser._id}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                console.log(data.message);
+            } else {
+                setUsers(prev => prev.filter(user => user._id !== userIdToDelete));
+            }
+            setLoading(false);
         } catch (error) {
-          console.log(error.message);
+            console.log(error.message);
+            setLoading(false);
         }
     };
+
+    if (loading) {
+        return (
+            <div className='flex justify-center items-center h-screen'>
+                <Spinner size='xl' />
+            </div>
+        );
+    }
 
     return (
         <div className='table-auto overflow-x-scroll md:mx-auto p-3 scrollbar scrollbar-track-slate-100 scrollbar-thumb-slate-300 dark:scrollbar-track-slate-700 dark:scrollbar-thumb-slate-500'>
