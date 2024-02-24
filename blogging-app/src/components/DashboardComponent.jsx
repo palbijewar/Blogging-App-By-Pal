@@ -16,56 +16,61 @@ function DashboardComponent() {
     const [lastMonthComments, setLastMonthComments] = useState(0);
     const { currentUser } = useSelector((state) => state.user);
 
-    useEffect(()=>{
-     const fetchUsers = async () => {
+    useEffect(() => {
+      const fetchUsers = async () => {
         try {
-            const res = await fetch(`http://localhost:3000/api/users?limit=5`, {
-                credentials: 'include',
-            });
-            const data = await res.json();
-            if (res.ok && data && data.totalUsersWithoutPasswords) {
-                setUsers(data.totalUsersWithoutPasswords);
-                setTotalUsers(data.totalUsers);
-                setLastMonthUsers(data.lastMonthUsers);
-            }
-        } catch (error) {
-            console.error('Error fetching users:', error.message);
-        } 
-     }
-     const fetchPosts = async () => {
-        try {
-            const res = await fetch(`http://localhost:3000/api/posts?limit=5`);
-            const data = await res.json();
-            if (res.ok) {
-              setPosts(data.allPosts);
-              setTotalPosts(data.totalPosts);
-              setLastMonthPosts(data.lastMonthPosts);
-            }
-          } catch (error) {
-            console.log(error.message);
-        }
-     }
-     const fetchComments = async () => {
-        try {
-            const res = await fetch(`http://localhost:3000/api/comments?limit=5`, {
-              credentials: 'include',
-            });
-            const data = await res.json();
-            if (res.ok) {
-                setComments(data.allComments);
-                setTotalComments(data.totalComments);
-                setLastMonthComments(data.lastMonthComments);
-              }
-            } catch (error) {
-              console.log(error.message);
+          const res = await fetch(`http://localhost:3000/api/users?limit=5`, {
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setUsers(data.totalUsersWithoutPasswords);
+            setTotalUsers(data.totalUsers);
+            setLastMonthUsers(data.lastMonthUsers);
           }
-     }
-     if(currentUser.is_admin){
-        fetchUsers()
-        fetchPosts()
-        fetchComments()
-     }
-    }, [currentUser])
+        } catch (error) {
+          console.error('Error fetching users:', error.message);
+        }
+      };
+  
+      const fetchPosts = async () => {
+        try {
+          const res = await fetch(`http://localhost:3000/api/posts?limit=5`,{
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setPosts(data.allPosts);
+            setTotalPosts(data.totalPosts);
+            setLastMonthPosts(data.lastMonthPosts);
+          }
+        } catch (error) {
+          console.error('Error fetching posts:', error.message);
+        }
+      };
+  
+      const fetchComments = async () => {
+        try {
+          const res = await fetch(`http://localhost:3000/api/comments?limit=5`, {
+            credentials: 'include',
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setComments(data.allComments);
+            setTotalComments(data.totalComments);
+            setLastMonthComments(data.lastMonthComments);
+          }
+        } catch (error) {
+          console.error('Error fetching comments:', error.message);
+        }
+      };
+  
+      if (currentUser.is_admin) {
+        fetchUsers();
+        fetchPosts();
+        fetchComments();
+      }
+    }, [currentUser]);
 
   return (
     <div className='p-3 md:mx-auto'>
