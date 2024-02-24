@@ -12,53 +12,53 @@ function PostPage() {
     const [post, setPost] = useState(null);
     const [recentPosts, setRecentPosts] = useState(null);
 
-  useEffect(() => {
-     const fetchPost = async () => {
-        try {
-            setLoading(true);
-            const res = await fetch(`http://localhost:3000/api/posts?slug=${postSlug}`);
-            const data = await res.json();
-            if (!res.ok) {
+    useEffect(() => {
+        const fetchPost = async () => {
+            try {
+                setLoading(true);
+                const res = await fetch(`http://localhost:3000/api/posts?slug=${postSlug}`);
+                const data = await res.json();
+                if (!res.ok) {
+                    setError(true);
+                } else {
+                    setPost(data.allPosts[0]);
+                }
+            } catch (error) {
                 setError(true);
-                setLoading(false);
-                return;
-            } 
-            if(res.ok){
-                setPost(data.allPosts[0]);
-                setLoading(false);
-                setError(false);
-            }
-        } catch (error) {
+            } finally {
+            setLoading(false);
             setLoading(false);
             setError(true);
-        }
-     };
-     fetchPost();
-    }, [postSlug])
+                setLoading(false);
+            setError(true);
+            }
+        };
+        fetchPost();
+    }, [postSlug]);
 
     useEffect(() => {
-      try {
         const fetchRecentPosts = async () => {
-              const res = await fetch(`http://localhost:3000/api/posts?limit=3`,{
-                credentials: 'include'
-              });
-              const data = await res.json();
-              if (res.ok) {
-                setRecentPosts(data.allPosts);
-              }
-            };
-            fetchRecentPosts();
-          } catch (error) {
-            console.log(error.message);
-          }
-        }, []);
-  
+            try {
+                const res = await fetch(`http://localhost:3000/api/posts?limit=3`, {
+                    credentials: 'include'
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    setRecentPosts(data.allPosts.filter((recentPost) => recentPost._id !== post?._id));
+                }
+            } catch (error) {
+                console.log(error.message);
+            }
+        };
+        fetchRecentPosts();
+    }, [post]);
 
-  if (loading) return (
+    if (loading) return (
         <div className='flex justify-center items-center min-h-screen' >
             <Spinner size='xl' />
         </div>
-    )
+    );
+
  return (
     <main className='p-3 flex flex-col max-w-6xl mx-auto min-h-screen' >
       <h1 className='text-3xl mt-10 p-3 text-center font-serif max-w-2xl mx-auto lg:text-4xl' >
@@ -91,15 +91,15 @@ function PostPage() {
       </div>
   <CommentSection postId={post._id} />
 
-  <div className='flex flex-col justify-center items-center mb-5'>
-        <h1 className='text-xl mt-5'>Recent articles</h1>
-        <div className='flex flex-wrap gap-5 mt-5 justify-center'>
-          {recentPosts &&
-            recentPosts.map((post) => <PostCard key={post._id} post={post} />)}
-        </div>
-  </div>
-    </main>
-  )
+    <div className='flex flex-col justify-center items-center mb-5'>
+                <h1 className='text-xl mt-5'>Recent articles</h1>
+                <div className='flex flex-wrap gap-5 mt-5 justify-center'>
+                    {recentPosts &&
+                        recentPosts.map((post) => <PostCard key={post._id} post={post} />)}
+                </div>
+            </div>
+        </main>
+ )
 }
 
 export default PostPage
