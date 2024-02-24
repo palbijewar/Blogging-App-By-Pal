@@ -1,4 +1,5 @@
 import comments from '../models/Comment.model.js';
+import { errorHandler } from '../utils/error.js';
 
 export const createComment = async (req,res,next) => {
     try {
@@ -18,7 +19,7 @@ export const createComment = async (req,res,next) => {
     }
 };
 
-export const getComments = async (req, res, next) => {
+export const getPostComments = async (req, res, next) => {
     try {
       const allComments = await comments.find({ post_id: req.params.postId }).sort({
         createdAt: -1,
@@ -88,3 +89,33 @@ export const getComments = async (req, res, next) => {
     }
   };
   
+  export const getComments = async (req,res,next) => {
+    if (!req.user.is_admin) {
+      return next(errorHandler(403, 'You are not allowed to comment'));
+  }  
+    try {
+      const startIndex = parseInt(req.query.startIndex) || 0;
+      const limit = parseInt(req.query.limit) || 9;
+      const sortDirection = req.query.order === 'asc' ? 1 : -1;
+  
+      const allComments = await comments
+         .find()
+         .sort({ updatedAt: sortDirection })
+         .skip(startIndex)
+         .limit(limit);
+      
+      const totalComments = await comments.countDocuments();
+      const now = new Date();
+      const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
+      const lastMonthComments = await comments.countDocuments({
+         createdAt: { $gte: oneMonthAgo },
+      });
+      res.status(200).json({
+        allComments,
+        totalComments,
+        lastMonthComments,
+      })
+    } catch (error) {
+      next(error);
+    }
+  }
