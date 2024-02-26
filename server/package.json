@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon api/src/index.js",
-    "build": "npm install && npm install --prefix blogging-app && npm run build --prefix blogging-app"
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
   },
   "type": "module",
   "author": "pal",

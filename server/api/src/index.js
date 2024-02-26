@@ -6,11 +6,8 @@ import postRoutes from './routes/posts.routes.js';
 import commentRoutes from './routes/comments.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import path from 'path';
 
 dotenv.config();
-
-const __dirname = path.resolve();
 
 const app = express();
 app.use(cookieParser());
@@ -29,10 +26,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 
-app.use(express.static(path.join(__dirname, '/blogging-app/dist')));
-
-app.get('*', (req,res) => {
-  res.sendFile(path.join(__dirname, 'blogging-app', 'dist', 'index.html'))
+app.get('/', (req, res) => {
+  res.send('Hello World');
 });
 
 app.use((err, req, res, next) => {
